@@ -133,10 +133,21 @@ module.exports = function(config) {
 						exclude: /node_modules/,
 						loader: 'babel-loader',
 						options: {
-							// comments: false,
-							// compact: true,
-							plugins: coverage ?
-								[['istanbul', {
+							babelrc: false,
+							configFile: false,
+							presets: [
+								['env', {
+									loose: true,
+									exclude: ['transform-es2015-typeof-symbol'],
+									targets: {
+										browsers: ['last 2 versions', 'IE >= 9']
+									}
+								}]
+							],
+							plugins: [
+								'transform-object-rest-spread',
+								'transform-react-jsx',
+								coverage && ['istanbul', {
 									exclude: [
 										// Default config
 										'coverage/**',
@@ -149,7 +160,8 @@ module.exports = function(config) {
 										// Our custom extension
 										'{debug,hooks,compat,test-utils}/test/**/*'
 									]
-								}]] : []
+								}]
+							].filter(Boolean)
 						}
 					}
 				]

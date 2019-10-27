@@ -344,7 +344,7 @@ export function serializeVNode(vnode) {
 		}
 	}
 
-	let children = props.children;
+	let children = props && props.children;
 	return `<${name}${attrs}${children && children.length
 		? '>..</'+name+'>'
 		: ' />'}`;

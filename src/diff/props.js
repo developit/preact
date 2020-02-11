@@ -10,12 +10,12 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(dom, newProps, oldProps, isSvg, hydrate, type) {
 	let i;
 
 	for (i in oldProps) {
 		if (!(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+			setProperty(dom, i, null, oldProps[i], isSvg, type);
 		}
 	}
 
@@ -26,7 +26,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg, type);
 		}
 	}
 }
@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-function setProperty(dom, name, value, oldValue, isSvg) {
+function setProperty(dom, name, value, oldValue, isSvg, type) {
 	if (isSvg) {
 		if (name === 'className') {
 			name = 'class';
@@ -62,7 +62,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	} else if (name === 'class') {
 		name = 'className';
 	}
-
+	
 	if (name === 'key' || name === 'children') {
 	} else if (name === 'style') {
 		const s = dom.style;
@@ -97,6 +97,12 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		let useCapture = name !== (name = name.replace(/Capture$/, ''));
 		let nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).slice(2);
+		
+		// Fix onInput not firing on select/radio/checkbox in Edge <= 18.
+		if (name === 'input' && (
+			type === 'select' ||
+			type === 'input' && /rad|check/.test(props.type)
+		)) name = 'change';
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);

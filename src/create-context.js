@@ -14,28 +14,28 @@ export function createContext(defaultValue) {
 		Provider(props) {
 			if (!this.getChildContext) {
 				const subs = [];
-				this.getChildContext = () => {
+				this.getChildContext = function() {
 					ctx[context._id] = this;
 					return ctx;
 				};
 
-				this.shouldComponentUpdate = _props => {
-					if (this.props.value !== _props.value) {
+				this.shouldComponentUpdate = function (_props) {
+					const newValue = this.props.value;
+					if (newValue !== _props.value) {
 						subs.some(payload => {
-							payload.c.context = _props.value;
-							if (!payload.u || payload.u(_props.value, this.props.value)) {
-								enqueueRender(payload.c);
+							payload[0].context = _props.value;
+							if (!payload[1] || payload[1](_props.value, newValue)) {
+								enqueueRender(payload[0]);
 							}
 						});
 					}
 				};
 
-				this.sub = (c, shouldUpdate) => {
-					const entry = { c, u: shouldUpdate };
-					subs.push(entry);
+				this.sub = function() {
+					subs.push(arguments);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(entry), 1);
+						subs.splice(subs.indexOf(arguments), 1);
 						old && old.call(c);
 					};
 				};

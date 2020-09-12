@@ -50,6 +50,7 @@ function reorderChildren(newVNode, oldDom, parentDom) {
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diff(
 	parentDom,
@@ -60,7 +61,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	doc
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -221,7 +223,8 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating
+				isHydrating,
+				doc
 			);
 
 			c.base = newVNode._dom;
@@ -250,7 +253,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating
+				isHydrating,
+				doc
 			);
 		}
 
@@ -296,6 +300,7 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode #2545
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
@@ -306,7 +311,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating
+	isHydrating,
+	doc
 ) {
 	let i;
 	let oldProps = oldVNode.props;
@@ -338,15 +344,12 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (newVNode.type === null) {
-			return document.createTextNode(newProps);
+			return doc.createTextNode(newProps);
 		}
 
 		dom = isSvg
-			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(
-					newVNode.type,
-					newProps.is && { is: newProps.is }
-			  );
+			? doc.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
+			: doc.createElement(newVNode.type, newProps.is && { is: newProps.is });
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
@@ -408,7 +411,8 @@ function diffElementNodes(
 				excessDomChildren,
 				commitQueue,
 				EMPTY_OBJ,
-				isHydrating
+				isHydrating,
+				doc
 			);
 		}
 

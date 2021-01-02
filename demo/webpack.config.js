@@ -16,6 +16,7 @@ module.exports = {
 			['preact/debug']: path.join(__dirname, '..', 'debug'),
 			['preact/devtools']: path.join(__dirname, '..', 'devtools'),
 			['preact/hooks']: path.join(__dirname, '..', 'hooks', 'src'),
+      ["preact/composition"]: path.join(__dirname, '..', 'composition', 'src'),
 			preact: preact,
 			react: compat,
 			'react-dom': compat

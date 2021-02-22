@@ -40,6 +40,8 @@ process.stdout.write = msg => {
 	return orgStdoutWrite.call(process.stdout, out);
 };
 
+sauceLabs = true;
+
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
@@ -239,7 +241,10 @@ module.exports = function(config) {
 		},
 
 		coverageReporter: {
-			dir: path.join(__dirname, 'coverage'),
+			dir: browser => {
+				console.log('browser name', browser);
+				return path.join(__dirname, 'coverage');
+			},
 			reporters: [
 				{ type: 'text-summary' },
 				{ type: 'html' },

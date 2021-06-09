@@ -146,6 +146,15 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  */
 function eventProxy(e) {
 	this._listeners[e.type + false](options.event ? options.event(e) : e);
+	if (
+		this._isControlled &&
+		(e.type === 'input' || e.type === 'change') &&
+		this._prevValue != null
+	) {
+		if (this.type === 'checkbox')
+			this.checked = this._prevValue;
+		else if (this.value != null) this.value = this._prevValue;
+	}
 }
 
 function eventProxyCapture(e) {

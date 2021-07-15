@@ -138,3 +138,11 @@ declare namespace React {
 	): void;
 	export const unstable_now: () => number;
 }
+
+declare module 'preact/src/jsx' {
+	namespace JSXInternal {
+		interface HTMLAttributes<RefType extends EventTarget = EventTarget> {
+			defaultValue?: string;
+		}
+	}
+}

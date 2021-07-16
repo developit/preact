@@ -8,8 +8,6 @@ import React, {
 	Fragment,
 	createContext,
 	useState,
-	useEffect,
-	useLayoutEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -104,7 +102,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should reset hooks of components', () => {
+	it('should set state correctly', () => {
 		let set;
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
@@ -150,73 +148,7 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
-		});
-	});
-
-	it('should call effect cleanups', () => {
-		let set;
-		const effectSpy = sinon.spy();
-		const layoutEffectSpy = sinon.spy();
-		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {() => Promise<void>} */
-		let resolve;
-		const Lazy = lazy(() => {
-			const p = new Promise(res => {
-				resolve = () => {
-					res({ default: LazyComp });
-					return p;
-				};
-			});
-
-			return p;
-		});
-
-		const Parent = ({ children }) => {
-			const [state, setState] = useState(false);
-			set = setState;
-			useEffect(() => {
-				return () => {
-					effectSpy();
-				};
-			}, []);
-
-			useLayoutEffect(() => {
-				return () => {
-					layoutEffectSpy();
-				};
-			}, []);
-
-			return state ? (
-				<div>{children}</div>
-			) : (
-				<div>
-					<p>hi</p>
-				</div>
-			);
-		};
-
-		render(
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Parent>
-					<Lazy name="LazyComp" />
-				</Parent>
-			</Suspense>,
-			scratch
-		);
-
-		set(true);
-		rerender();
-		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
-		expect(effectSpy).to.be.calledOnce;
-		expect(layoutEffectSpy).to.be.calledOnce;
-
-		return resolve().then(() => {
-			rerender();
-			expect(effectSpy).to.be.calledOnce;
-			expect(layoutEffectSpy).to.be.calledOnce;
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+			expect(scratch.innerHTML).to.eql(`<div><p>hi</p><div>Hello from LazyComp</div></div>`);
 		});
 	});
 

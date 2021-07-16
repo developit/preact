@@ -20,7 +20,9 @@ export function _catchError(error, vnode) {
 				}
 
 				if (component.componentDidCatch != null) {
-					component.componentDidCatch(error);
+					component.componentDidCatch(error, {
+						componentStack: '' // TODO: Capture proper component stack
+					});
 					handled = component._dirty;
 				}
 
